@@ -13,6 +13,10 @@ class Command(BaseCommand):
             user = User.objects.create(
                 email=email, phone_number=f"+5 555 555 00{i}", city=f"City_{i}"
             )
+            user.set_password(f"user_{i}")
+            user.save()
             self.stdout.write(
-                self.style.SUCCESS(f"Successfully created admin user {user.email}")
+                self.style.SUCCESS(
+                    f"Successfully created admin user {user.email} with password: {user.password}"
+                )
             )
