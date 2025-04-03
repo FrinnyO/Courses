@@ -1,13 +1,18 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, views
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import Payment, User
+from education.models import Course
+
+from .models import Payment, Subscription, User
 from .permissions import IsAdmin, IsOwner
 from .serializers import (OtherUserSerializer, PaymentSerializer,
-                          UserSerializer, UserTokenObtainPairSerializer)
+                          SubscriptionSerializer, UserSerializer,
+                          UserTokenObtainPairSerializer)
 
 
 class UserListAPIView(generics.ListAPIView):
@@ -63,3 +68,23 @@ class PaymentListAPIView(generics.ListCreateAPIView):
 class UserTokenObtainPairView(TokenObtainPairView):
     serializer_class = UserTokenObtainPairSerializer
     permission_classes = [AllowAny]
+
+
+class SubscriptionAPIView(views.APIView):
+
+    serializer_class = SubscriptionSerializer
+
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        course_id = self.request.data.get("course")
+        course_item = get_object_or_404(Course, pk=course_id)
+
+        subs_item = Subscription.objects.filter(user=user, course=course_item)
+
+        if subs_item.exists():
+            subs_item.delete()
+            message = "Deleted subscription"
+        else:
+            Subscription.objects.create(user=user, course=course_item)
+            message = "Added subscription"
+        return Response({"message": message})
