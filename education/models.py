@@ -42,8 +42,7 @@ class Lesson(models.Model):
     video_link = models.URLField(
         verbose_name="Video link",
         blank=True,
-        null=True,
-        validators=[validate_video_link],
+        null=True
     )
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="lessons", verbose_name="Course"
