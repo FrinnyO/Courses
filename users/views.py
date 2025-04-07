@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, views
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
@@ -13,6 +14,8 @@ from .permissions import IsAdmin, IsOwner
 from .serializers import (OtherUserSerializer, PaymentSerializer,
                           SubscriptionSerializer, UserSerializer,
                           UserTokenObtainPairSerializer)
+from .services import (check_session_status, create_stripe_price,
+                       create_stripe_product, create_stripe_session)
 
 
 class UserListAPIView(generics.ListAPIView):
@@ -48,6 +51,7 @@ class UserDestroyAPIView(generics.DestroyAPIView):
     permission_classes = (IsAdmin,)
 
 
+@swagger_auto_schema(operation_description="description")
 class UserRetrieveAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
 
@@ -57,12 +61,34 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
         return OtherUserSerializer
 
 
-class PaymentListAPIView(generics.ListCreateAPIView):
+class PaymentListAPIView(generics.ListAPIView):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ["payment_method", "paid_course", "paid_lesson"]
     ordering_fields = ["payment_date"]
+
+
+class PaymentCreateAPIView(generics.CreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        product = payment.paid_course or payment.paid_lesson
+        product_name = create_stripe_product(product)
+        price = create_stripe_price(payment.amount, product_name)
+        session_id, payment_link = create_stripe_session(price)
+        payment.session_id = session_id
+        payment.link = payment_link
+        payment.save()
+
+
+class SessionRetrieveAPIView(views.APIView):
+    def get(self, request):
+        session_id = request.data.get("session_id")
+        session_status = check_session_status(session_id)
+        return Response({"session_status": session_status})
 
 
 class UserTokenObtainPairView(TokenObtainPairView):
