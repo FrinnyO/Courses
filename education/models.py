@@ -39,11 +39,7 @@ class Lesson(models.Model):
         default="lessons/default_lesson.png",
         verbose_name="Preview",
     )
-    video_link = models.URLField(
-        verbose_name="Video link",
-        blank=True,
-        null=True
-    )
+    video_link = models.URLField(verbose_name="Video link", blank=True, null=True)
     course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="lessons", verbose_name="Course"
     )

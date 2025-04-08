@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .validators import validate_video_link
+
 from users.models import Subscription
 from users.serializers import SubscriptionSerializer
 
 from .models import Course, Lesson
+from .validators import validate_video_link
 
 
 class LessonSerializer(serializers.ModelSerializer):
