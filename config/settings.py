@@ -76,10 +76,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("DATABASE_NAME"),
-        "USER": os.getenv("DATABASE_USER"),
-        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
-        "HOST": os.getenv("DATABASE_HOST"),
+        "NAME": os.getenv("POSTGRES_NAME"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": os.getenv("DATABASE_PORT"),
     }
 }
@@ -141,10 +141,10 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULE = {
     "check_user_status": {
-        "task": "users.tasks.check_user_status",  # Путь к задаче
+        "task": "users.tasks.check_user_status",
         "schedule": timedelta(
             days=1
-        ),  # Расписание выполнения задачи (например, каждые 10 минут)
+        ),
     },
 }
 
