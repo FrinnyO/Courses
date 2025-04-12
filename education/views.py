@@ -3,10 +3,13 @@ from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from users.models import Subscription
+
 from .models import Course, Lesson
 from .paginators import CustomPagination
 from .permissions import IsModerator, IsOwner
 from .serializers import CourseSerializer, LessonSerializer
+from .tasks import send_update_course_message
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -59,6 +62,23 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer = CourseSerializer(course, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        send_update_course_message.delay(serializer.data)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        course = get_object_or_404(Course, pk=pk)
+        if not (
+            IsOwner().has_object_permission(request, self, course)
+            or IsModerator().has_permission(request, self)
+        ):
+            return Response(
+                {"detail": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        serializer = CourseSerializer(course, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        send_update_course_message.delay(serializer.data)
         return Response(serializer.data)
 
     def create(self, request):
