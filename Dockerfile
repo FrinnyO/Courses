@@ -7,16 +7,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir poetry
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pyproject.toml poetry.lock ./
-
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-root
 
 COPY . .
-
-ENV PYTHONPATH=/code
-ENV PYTHONUNBUFFERED=1
-
-EXPOSE 8000

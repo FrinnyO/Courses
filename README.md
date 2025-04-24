@@ -4,7 +4,52 @@
 
 Этот проект представляет собой Django API, предназначенный для управления онлайн-курсами, уроками и платежами пользователей. Он предоставляет структурированный способ создания образовательного контента и управления им, а также отслеживания платежей пользователей. Проект включает команды управления для настройки исходных данных, создания тестовых пользователей и генерации платежей для этих пользователей.
 
-# Инструкции по настройке проекта
+
+# Инструкции по развертыванию на сервере
+
+## Подготовьте удаленный сервер
+
+1. **Создайте удаленный сервер **: Вы можете использовать любого облачного провайдера (например, AWS, DigitalOcean и т.д.) для создания удаленного сервера.
+2. **Заполните информацию**:
+ - Создайте файл .env в каталоге проекта и заполните его в соответствии с .env.sample
+ - Добавьте необходимые секреты и переменные в разделе "Секреты" на GitHub.
+
+### Oбзор необходимых секретов GitHub Secrets:
+
+- 'DJANGO_SECRET_KEY' - Django secret key for the project.
+- 'DOCKER_USERNAME' - Docker Hub username.
+- 'DOCKER_PASSWORD' - Docker Hub password.
+- 'SERVER_IP' - IP address of the remote server.
+- 'SSH_KEY' - SSH key for accessing the remote server.
+- 'SSH_USER' - SSH user for accessing the remote server.
+- 'POSTGRES_USER' - PostgreSQL username.
+- 'POSTGRES_PASSWORD' - PostgreSQL password.
+
+### Обзор необходимых переменных на GitHub:
+
+- 'CELERY_BROKER_URL' - URL for the Celery broker (Redis). **Default example: redis://redis:6379/1**
+- 'CELERY_RESULT_BACKEND' - URL for the Celery result backend (Redis). **Default example: redis://redis:6379/1**
+- 'REDIS_HOST' - Redis host. **Default example: redis://redis:6379//**
+- 'DEBUG' - Debug mode for Django. **Default example: True**
+- 'POSTGRES_DB' - PostgreSQL database name. **First create database locally on your machine**
+- 'POSTGRES_HOST' - PostgreSQL host. **Default example: db - as specified inside docker-compose.yml (service: db)**
+- 'POSTGRES_PORT' - PostgreSQL port. **Default example: 5432**
+
+## После того как вы настроили удаленный сервер и ввели необходимые секретные данные и переменные, вы можете приступить к развертыванию.
+
+Вам просто нужно выполнить push- или pull-запрос, и если все настроено правильно, развертывание будет выполнено автоматически.
+
+Если вы хотите создать нового пользователя с правами администратора, вы можете сделать это, выполнив следующую команду на удаленном сервере:
+#### Примечание: Сначала перейдите к каталогу проекта.
+#### Примечание: Если у вас возникли проблемы с правами доступа, вы можете использовать команду sudo.
+
+```sh
+docker exec backend python3 manage.py createadmin
+```
+
+Теперь вы можете получить доступ к своему удаленному серверу, используя IP-адрес. Для получения более подробной информации о структуре проекта, пожалуйста, продолжайте следовать руководству
+
+# Инструкции по локальной настройке проекта
 
 
 Прежде всего, убедитесь, что на вашем компьютере установлены Docker и Docker Compose.
